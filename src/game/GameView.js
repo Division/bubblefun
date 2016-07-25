@@ -83,7 +83,7 @@ exports = Class(ui.View, function (supr)
 
     this.handleTapStart = function(point)
     {
-        let ballLauncherPoint = point;
+        var ballLauncherPoint = point;
         this.ballLauncher.style.localizePoint(ballLauncherPoint);
         this.ballLauncher.setTargetPoint(ballLauncherPoint);
     };
@@ -91,7 +91,7 @@ exports = Class(ui.View, function (supr)
 
     this.handleTapMove = function(point)
     {
-        let ballLauncherPoint = point;
+        var ballLauncherPoint = point;
         this.ballLauncher.style.localizePoint(ballLauncherPoint);
         this.ballLauncher.setTargetPoint(ballLauncherPoint);
     };
@@ -99,7 +99,7 @@ exports = Class(ui.View, function (supr)
 
     this.handleTapEnd = function(point)
     {
-        let ballLauncherPoint = point;
+        var ballLauncherPoint = point;
         this.ballLauncher.style.localizePoint(ballLauncherPoint);
         this.ballLauncher.fire(ballLauncherPoint);
     };

@@ -162,7 +162,7 @@ exports = Class(ui.View, function (supr)
 
     this.getHexOffsetFromPixel = function(x, y)
     {
-        let containerPoint = new GCPoint(x, y);
+        var containerPoint = new GCPoint(x, y);
         this.itemContainer.style.localizePoint(containerPoint);
         var offset = HexMath.pixelToOffset(containerPoint.x, containerPoint.y, Config.hexRadius);
         return offset;
@@ -171,7 +171,7 @@ exports = Class(ui.View, function (supr)
 
     this.convertPointFromGameViewToItemContainerView = function(x, y)
     {
-        let localPoint = new GCPoint(x, y);
+        var localPoint = new GCPoint(x, y);
         this.itemContainer.style.localizePoint(localPoint);
         return new Point(localPoint.x, localPoint.y);
     }
