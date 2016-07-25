@@ -60,14 +60,14 @@ exports = Class(ui.View, function (supr)
         var self = this;
         this.on('InputStart', function(e, point) {
             self.inputIsDown = true;
-            let gameViewPoint = new GCPoint(point);
+            var gameViewPoint = new GCPoint(point);
             self.gameView.style.localizePoint(gameViewPoint);
             self.gameView.handleTapStart(gameViewPoint);
         });
 
         this.on('InputMove', function(e, point) {
             if (self.inputIsDown) {
-                let gameViewPoint = new GCPoint(point);
+                var gameViewPoint = new GCPoint(point);
                 self.gameView.style.localizePoint(gameViewPoint);
                 self.gameView.handleTapMove(gameViewPoint);
             }
@@ -75,7 +75,7 @@ exports = Class(ui.View, function (supr)
 
         this.on('InputSelect', function(e, point) {
             self.inputIsDown = false;
-            let gameViewPoint = new GCPoint(point);
+            var gameViewPoint = new GCPoint(point);
             self.gameView.style.localizePoint(gameViewPoint);
             self.gameView.handleTapEnd(gameViewPoint);
         });
