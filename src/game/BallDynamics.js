@@ -16,7 +16,6 @@ exports = Class(function ()
     // Var
 
     this.BALL_FLY_SPEED = 1000;
-    this.FIXED_UPDATE_FPS = 60;
 
     /**
         Array of BallView
@@ -58,12 +57,9 @@ exports = Class(function ()
         this.moveFiredBalls(dt);
 
         var time = new Date().getTime() / 1000;
-        // if (time > this.nextFixedUpdateTime) {
-            this.nextFixedUpdateTime = time + 1 / this.FIXED_UPDATE_FPS;
-            // this.moveFalledBalls(1 / this.FIXED_UPDATE_FPS);
-            this.moveFalledBalls(dt);
-            this.keepFalledBallsInBounds();
-        // }
+        this.nextFixedUpdateTime = time + 1 / this.FIXED_UPDATE_FPS;
+        this.moveFalledBalls(dt);
+        this.keepFalledBallsInBounds();
     };
 
     //------------------------------------------------------------------------

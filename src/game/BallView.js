@@ -33,6 +33,8 @@ exports = Class(ImageView, function (supr)
         supr(this, 'init', [options]);
         this.position = new Point();
         this.prevPosition = new Point();
+        this.style.anchorX = Config.ballRadius;
+        this.style.anchorY = Config.ballRadius;
     }
 
 

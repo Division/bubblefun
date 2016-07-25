@@ -9,6 +9,7 @@ import src.game.HexViewItemContainer as HexViewItemContainer;
 import src.utils.HexMath as HexMath;
 import math.geom.Point as GCPoint;
 import src.utils.Point as Point;
+import animate;
 
 exports = Class(ui.View, function (supr)
 {
@@ -27,6 +28,8 @@ exports = Class(ui.View, function (supr)
 
     this.MAX_SCROLL_SPEED = 5;
     this.LEVEL_ANIM_SCROLL_SPEED = 2;
+
+    this.DESTROY_INTERVAL = 25;
 
     //---------------
     // Var
@@ -49,6 +52,9 @@ exports = Class(ui.View, function (supr)
 
     this.ballPool = null,
 
+    this.ballsToDestroy = null;
+    this.destroyTime = 0;
+
     //------------------------------------------------------------------------
     // Init
     //------------------------------------------------------------------------
@@ -68,8 +74,8 @@ exports = Class(ui.View, function (supr)
             self.handleBallLanded(e.item, e.offsetX, e.offsetY);
         });
 
-        this.hexModel.on(this.hexModel.EVENT_ITEMS_DESTROYED, function(items) {
-            self.handleBallsDestroyed(items);
+        this.hexModel.on(this.hexModel.EVENT_ITEMS_DESTROYED, function(items, x, y) {
+            self.handleBallsDestroyed(items, x, y);
         });
 
         this.hexModel.on(this.hexModel.EVENT_ITEMS_FALL, function(items) {
@@ -96,6 +102,9 @@ exports = Class(ui.View, function (supr)
                 zIndex: 4
             }
         });
+
+
+        this.ballsToDestroy = [];
 
     }
 
@@ -126,10 +135,20 @@ exports = Class(ui.View, function (supr)
     }
 
 
-    this.handleBallsDestroyed = function(items)
+    this.handleBallsDestroyed = function(items, x, y)
     {
+        var origin = HexMath.offsetToPixel(x, y, Config.hexRadius);
+
         for (var i = 0; i < items.length; i++) {
-            this.ballPool.releaseView(items[i].ball);
+            items[i].distance = Point.distance(origin, items[i].ball.position);
+        }
+
+        // items.sort(function(a, b) {
+        //     return a.distance > b.distance;
+        // });
+
+        for (i = 0; i < items.length; i++) {
+            this.ballsToDestroy.push(items[i].ball);
         }
     }
 
@@ -199,6 +218,28 @@ exports = Class(ui.View, function (supr)
     this.tick = function(dtMS)
     {
         var dt = dtMS / 1000;
+
+        if (this.ballsToDestroy.length) {
+            var time = new Date().getTime(),
+                self = this;
+
+            if (time > this.destroyTime) {
+                var ball = this.ballsToDestroy.shift();
+                animate(ball).now({
+                    scale: 0.3,
+                }, 70)
+                .then({
+                    scale: 1.2,
+                    opacity: 0.2,
+                }, 100)
+                .then(function() {
+                    ball.style.opacity = 1;
+                    ball.style.scale = 1;
+                    self.ballPool.releaseView(ball);
+                });
+                this.destroyTime = time + this.DESTROY_INTERVAL;
+            }
+        }
 
         switch (this.state)
         {

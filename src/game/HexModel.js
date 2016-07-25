@@ -278,7 +278,7 @@ exports = Class(Emitter, function (supr)
 
         if (sameColorBalls.length >= 3) {
             var minRow = this.numberOfLines - 1;
-            this.emit(this.EVENT_ITEMS_DESTROYED, sameColorBalls);
+            this.emit(this.EVENT_ITEMS_DESTROYED, sameColorBalls, x, y);
             for (var i = 0; i < sameColorBalls.length; i++) {
                 sameColorBalls[i].item.type = 0;
                 sameColorBalls[i].item.ball = undefined;

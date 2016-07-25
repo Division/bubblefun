@@ -21,7 +21,7 @@ exports =
             'lines_ry',
             'three_color_group1',
             'lines_ry',
-            'lines_pb',
+            // 'lines_pb',
             [0 , g , b , r , g , b , r , g , b , r , 0],
              [ r , p , p ],
             [ b , 0 ],

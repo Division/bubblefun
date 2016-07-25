@@ -33,6 +33,8 @@ exports = Class(ui.View, function (supr)
 
     this.RECOVER_PERIOD = 200;
 
+    this.ANGLE_LIMIT = 30 / 180 * Math.PI;
+
     //---------------
     // Var
 
@@ -170,6 +172,7 @@ exports = Class(ui.View, function (supr)
                 var direction = Point.subtract(targetPoint, this.restPosition),
                     horizontal = new Point(1, 0);
                 this.targetAngle = Point.angle(horizontal, direction);
+                this.targetAngle = Math.min(Math.max(this.ANGLE_LIMIT, this.targetAngle), Math.PI - this.ANGLE_LIMIT);
                 this.state = this.STATE_AIM;
                 result = true;
             }
