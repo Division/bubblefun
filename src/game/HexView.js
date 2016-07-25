@@ -143,9 +143,14 @@ exports = Class(ui.View, function (supr)
             items[i].distance = Point.distance(origin, items[i].ball.position);
         }
 
-        // items.sort(function(a, b) {
-        //     return a.distance > b.distance;
-        // });
+        items.sort(function(a, b) {
+            if  (a.distance > b.distance) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        });
 
         for (i = 0; i < items.length; i++) {
             this.ballsToDestroy.push(items[i].ball);
