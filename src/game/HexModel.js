@@ -3,6 +3,7 @@ import src.utils.HexMath as HexMath;
 import src.game.level.LevelBlocks as LevelBlocks;
 import src.game.level.Levels as Levels;
 import ui.ViewPool as ViewPool;
+import src.Config as Config;
 
 exports = Class(Emitter, function (supr)
 {
@@ -19,11 +20,6 @@ exports = Class(Emitter, function (supr)
 
     //---------------
     // Const
-
-    // Maximum number of cells on a single line on
-    // Odd lines will have one ball less on each line.
-    // The model contain them but they are always empty
-    this.HORIZONTAL_ITEM_COUNT = 11;
 
     this.CENTER_PINNED_ITEM_COUNT = 17;
 
@@ -63,7 +59,7 @@ exports = Class(Emitter, function (supr)
     this.init = function(options)
     {
         supr(this, 'init', arguments);
-        this.horizontalItemCount = this.HORIZONTAL_ITEM_COUNT;
+        this.horizontalItemCount = Config.defaultHorizontalHexCount;
     }
 
     //------------------------------------------------------------------------

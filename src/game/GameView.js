@@ -43,7 +43,7 @@ exports = Class(ui.View, function (supr)
 
         this.ballLauncher = new BallLauncher({
             superview: this,
-            ballRadius: this.hexView.BALL_RADIUS,
+            ballRadius: Config.ballRadius,
             width: this.BALL_LAUNCHER_WIDTH,
             height: 100,
             x: Config.screenWidth / 2 - this.BALL_LAUNCHER_WIDTH / 2,
@@ -55,8 +55,8 @@ exports = Class(ui.View, function (supr)
             initCount: 6,
             initOpts: {
                 parent: this,
-                width: this.hexView.BALL_RADIUS * 2,
-                height: this.hexView.BALL_RADIUS * 2
+                width: Config.ballRadius * 2,
+                height: Config.ballRadius * 2
             }
         });
 
@@ -65,7 +65,7 @@ exports = Class(ui.View, function (supr)
             ballPool: this.ballPool,
             hexView: this.hexView,
             model: this.hexModel,
-            ballRadius: this.hexView.BALL_RADIUS
+            ballRadius: Config.ballRadius
         });
 
         var self = this;

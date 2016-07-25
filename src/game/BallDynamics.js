@@ -90,7 +90,7 @@ exports = Class(function ()
             if (this.collideBalls(convertedPrevPosition, convertedNewPosition, ball, collisionInfo)) {
 
                 ball.putToPosition(newPosition);
-                var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, this.hexView.HEX_RADIUS);
+                var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, Config.hexRadius);
                 if (this.hexModel.offsetIsAvailableForLanding(offset.x, offset.y)) {
                     ball.setOffset(offset);
                 }
@@ -111,7 +111,7 @@ exports = Class(function ()
                 }
 
                 ball.putToPosition(newPosition);
-                var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, this.hexView.HEX_RADIUS);
+                var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, Config.hexRadius);
                 if (this.hexModel.offsetIsAvailableForLanding(offset.x, offset.y)) {
                     ball.setOffset(offset);
                 }
@@ -120,7 +120,7 @@ exports = Class(function ()
             // Simple movement, no collision occured
             else {
                 ball.putToPosition(newPosition);
-                var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, this.hexView.HEX_RADIUS);
+                var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, Config.hexRadius);
                 if (this.hexModel.offsetIsAvailableForLanding(offset.x, offset.y)) {
                     ball.setOffset(offset);
                 }
@@ -159,7 +159,7 @@ exports = Class(function ()
 
     this.collideBalls = function(prevPosition, position, collisionInfo)
     {
-        var positionOffset = HexMath.pixelToOffset(position.x ,position.y, this.hexView.HEX_RADIUS);
+        var positionOffset = HexMath.pixelToOffset(position.x ,position.y, Config.hexRadius);
             direction = Point.subtract(position, prevPosition).normalize(),
             leftPoint1 = prevPosition.clone();
             leftPoint2 = position.clone();
@@ -184,12 +184,12 @@ exports = Class(function ()
             if (self.hexModel.offsetIsValidForItems(x, y) && self.hexModel.offsetContainsBall(x, y)) {
 
                 // Checking first line
-                if (self.lineVsCircle(leftPoint1, leftPoint2,
-                                      HexMath.offsetToPixel(x, y, self.hexView.HEX_RADIUS),
+                if (Collision.lineVsCircle(leftPoint1, leftPoint2,
+                                      HexMath.offsetToPixel(x, y, Config.hexRadius),
                                       self.ballRadius, lineCircleCollisionInfo) ||
                 // Checking second line
-                    self.lineVsCircle(rightPoint1, rightPoint2,
-                                           HexMath.offsetToPixel(x, y, self.hexView.HEX_RADIUS),
+                    Collision.lineVsCircle(rightPoint1, rightPoint2,
+                                           HexMath.offsetToPixel(x, y, Config.hexRadius),
                                            self.ballRadius, lineCircleCollisionInfo)) {
 
                     self.hexView.itemContainer.addDebugLine(leftPoint1, leftPoint2);
@@ -212,23 +212,6 @@ exports = Class(function ()
     };
 
 
-    this.lineVsCircle = function(p1, p2, center, radius, collisionInfo)
-    {
-        if (collisionInfo) {
-            collisionInfo.circleCenter = center;
-            collisionInfo.circleRadius = radius;
-        }
 
-        var p1p2 = Point.subtract(p2,p1),
-            p1p2Length = p1p2.getMagnitude(),
-            p1p2Normalized = p1p2.clone().normalize(),
-            p1c = Point.subtract(center, p1),
-            projection = Math.min(Math.max(0, p1c.dot(p1p2Normalized)), p1p2Length),
-            projectionPoint = p1p2Normalized.multiply(projection).add(p1);
-
-        return projection > - radius &&
-               projection < p1p2Length + radius &&
-               Point.distance(center, projectionPoint) < radius;
-    }
 
 });

@@ -15,19 +15,7 @@ exports = Class(ui.View, function (supr)
     //---------------
     // Const
 
-    /*
-        Radius of the hexes
-    */
-    this.HEX_RADIUS = 0;
-
-    /**
-        Radius of the single ball
-    */
-    this.BALL_RADIUS = 0;
-
     this.MAXIMUM_LINES_VISIBLE = 8; // 8.5?
-    
-
 
     //---------------
     // Var
@@ -55,9 +43,6 @@ exports = Class(ui.View, function (supr)
 
         this.hexModel = options.model;
 
-        this.HEX_RADIUS = HexMath.getHexRadiusByWidth(Config.screenWidth / this.hexModel.horizontalItemCount);
-        this.BALL_RADIUS = HexMath.getHexWidth(this.HEX_RADIUS) / 2;
-
         var self = this;
         this.hexModel.on(this.hexModel.EVENT_LEVEL_LOADED, function() {
             self.handleNewLevelLoaded();
@@ -77,7 +62,7 @@ exports = Class(ui.View, function (supr)
 
         this.itemContainer = new HexViewItemContainer({
             superview: this,
-            radius: this.HEX_RADIUS,
+            radius: Config.hexRadius,
             model: this.hexModel
         });
 
@@ -86,8 +71,8 @@ exports = Class(ui.View, function (supr)
             initCount: 100,
             initOpts: {
                 parent: this.itemContainer,
-                width: this.BALL_RADIUS * 2,
-                height: this.BALL_RADIUS * 2
+                width: Config.ballRadius * 2,
+                height: Config.ballRadius * 2
             }
         });
 
@@ -137,7 +122,7 @@ exports = Class(ui.View, function (supr)
         }
 
         this.hexModel.setBallViewForOffset(ball, offsetX, offsetY);
-        ball.putToPosition(HexMath.offsetToPixel(offsetX, offsetY, this.HEX_RADIUS));
+        ball.putToPosition(HexMath.offsetToPixel(offsetX, offsetY, Config.hexRadius));
 
         return ball;
     }
@@ -166,9 +151,9 @@ exports = Class(ui.View, function (supr)
 
     this.updateContainerPosition = function()
     {
-        var offsetX = this.BALL_RADIUS;
+        var offsetX = Config.ballRadius;
         this.itemContainer.style.x = offsetX;
-        this.itemContainer.style.y = this.HEX_RADIUS;
+        this.itemContainer.style.y = Config.hexRadius;
     }
 
     //------------------------------------------------------------------------
@@ -179,7 +164,7 @@ exports = Class(ui.View, function (supr)
     {
         let containerPoint = new GCPoint(x, y);
         this.itemContainer.style.localizePoint(containerPoint);
-        var offset = HexMath.pixelToOffset(containerPoint.x, containerPoint.y, this.HEX_RADIUS);
+        var offset = HexMath.pixelToOffset(containerPoint.x, containerPoint.y, Config.hexRadius);
         return offset;
     }
 
