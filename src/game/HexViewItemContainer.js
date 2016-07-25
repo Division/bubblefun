@@ -124,8 +124,8 @@ exports = Class(ui.View, function (supr)
         ctx.font = "17px Arial";
         ctx.strokeStyle = "white";
 
-        for (let i = 0; i < columns; i++) {
-            for (let j = 0; j < rows; j++) {
+        for (var i = 0; i < columns; i++) {
+            for (var j = 0; j < rows; j++) {
 
                 if (j % 2 != 0 && i == columns - 1) {
                     continue;
@@ -135,7 +135,7 @@ exports = Class(ui.View, function (supr)
 
 
                 ctx.beginPath();
-                for (let k = 0; k < 7; k++) {
+                for (var k = 0; k < 7; k++) {
                     var angle = Math.PI * 2 * k / 6; // radians
                     var targetX = position.x + Math.sin(angle) * this.radius;
                     var targetY = position.y + Math.cos(angle) * this.radius;
