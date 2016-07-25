@@ -3,7 +3,7 @@ import ui.View;
 
 exports = Class(ui.View, function (supr)
 {
-    this.DEBUG_ENABLED = true;
+    this.DEBUG_ENABLED = false;
     this.DEBUG_GRID_ENABLED = true;
     this.DEBUG_GRID_FILL = true;
 
@@ -67,6 +67,7 @@ exports = Class(ui.View, function (supr)
     {
         if (this.debugLines.length == 0) {
             this.debugLines.length = 1;
+            this.debugLines[0] = {};
         }
 
         this.debugLines.push({
@@ -92,6 +93,10 @@ exports = Class(ui.View, function (supr)
     this.drawDebugLines = function(ctx)
     {
         for (var i = 0; i < this.debugLines.length; i++) {
+            if (!this.debugLines[i].p1) {
+                continue;
+            }
+
             ctx.strokeStyle = this.debugLines[i].color;
             ctx.lineWidth = this.debugLines[i].width;
             ctx.beginPath();

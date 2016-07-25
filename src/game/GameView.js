@@ -1,5 +1,6 @@
 import ui.View;
 import src.Config as Config;
+import src.game.GameLogics as GameLogics;
 import src.game.BallView as BallView;
 import src.game.HexView as HexView;
 import src.game.BallLauncher as BallLauncher;
@@ -21,6 +22,7 @@ exports = Class(ui.View, function (supr)
     this.ballLauncher = null;
     this.ballDynamics = null;
     this.ballPool = null;
+    this.gameLogics = null;
 
     //------------------------------------------------------------------------
     // init
@@ -38,7 +40,8 @@ exports = Class(ui.View, function (supr)
             superview: this,
             model: this.hexModel,
             width: Config.screenWidth,
-            height: Config.screenHeight
+            height: Config.screenHeight,
+            zIndex: 2
         });
 
         this.ballLauncher = new BallLauncher({
@@ -50,13 +53,22 @@ exports = Class(ui.View, function (supr)
             y: Config.screenHeight - 230
         });
 
+
+        this.gameLogics = new GameLogics({
+            model: this.hexModel,
+            ballLauncher: this.ballLauncher,
+            hexView: this.hexView
+        });
+
+
         this.ballPool = new ViewPool({
             ctor: BallView,
-            initCount: 6,
+            initCount: 100,
             initOpts: {
                 parent: this,
                 width: Config.ballRadius * 2,
-                height: Config.ballRadius * 2
+                height: Config.ballRadius * 2,
+                zIndex: 3
             }
         });
 

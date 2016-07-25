@@ -1,8 +1,11 @@
 import src.utils.Point as Point;
 import src.utils.HexMath as HexMath;
+import src.Config as Config;
 
 exports =
 {
+    smallCollisionRadius: 5,
+
     lineVsCircle: function(p1, p2, center, radius, collisionInfo)
     {
         if (collisionInfo) {
@@ -23,13 +26,14 @@ exports =
     },
 
 
-    collideBalls: function(hexModel, debugView, prevPosition, position, collisionInfo)
+    collideBalls: function(hexModel, prevPosition, position, collisionInfo, debugView)
     {
-        var positionOffset = HexMath.pixelToOffset(position.x ,position.y, Config.hexRadius);
+        var ballRadius = Config.ballRadius;
+            positionOffset = HexMath.pixelToOffset(position.x ,position.y, Config.hexRadius),
             direction = Point.subtract(position, prevPosition).normalize(),
-            leftPoint1 = prevPosition.clone();
+            leftPoint1 = prevPosition.clone(),
             leftPoint2 = position.clone();
-            leftPoint2.addXY(direction.x * this.ballRadius, direction.y * this.ballRadius);
+            leftPoint2.addXY(direction.x * ballRadius, direction.y * ballRadius);
         var rightPoint1 = leftPoint1.clone(),
             rightPoint2 = leftPoint2.clone();
 
@@ -48,13 +52,13 @@ exports =
             if (hexModel.offsetIsValidForItems(x, y) && hexModel.offsetContainsBall(x, y)) {
 
                 // Checking first line
-                if (Collision.lineVsCircle(leftPoint1, leftPoint2,
+                if (self.lineVsCircle(leftPoint1, leftPoint2,
                                       HexMath.offsetToPixel(x, y, Config.hexRadius),
-                                      self.ballRadius, lineCircleCollisionInfo) ||
+                                      ballRadius, lineCircleCollisionInfo) ||
                 // Checking second line
-                    Collision.lineVsCircle(rightPoint1, rightPoint2,
+                    self.lineVsCircle(rightPoint1, rightPoint2,
                                            HexMath.offsetToPixel(x, y, Config.hexRadius),
-                                           self.ballRadius, lineCircleCollisionInfo)) {
+                                           ballRadius, lineCircleCollisionInfo)) {
 
                     if (debugView) {
                         debugView.addDebugLine(leftPoint1, leftPoint2);
@@ -77,5 +81,37 @@ exports =
         }
 
         return false;
+    },
+
+
+    collideWalls: function(hexModel, prevPosition, position, ball, collisionInfo)
+    {
+        var result = false;
+
+        collisionInfo.depthX = null;
+        collisionInfo.horizontalLeft = null;
+        collisionInfo.verticalTop = null;
+        collisionInfo.depthY = null;
+        collisionInfo.horizontalHit = false;
+
+        if (position.x - Config.ballRadius < 0) {
+            collisionInfo.depthX = Config.ballRadius - position.x;
+            collisionInfo.horizontalLeft = true;
+            collisionInfo.horizontalHit = true;
+            result = true;
+        }
+        else if (position.x + Config.ballRadius > Config.screenWidth) {
+            collisionInfo.depthX = position.x + Config.ballRadius - Config.screenWidth;
+            collisionInfo.horizontalLeft = false;
+            collisionInfo.horizontalHit = true;
+            result = true;
+        }
+        if (!hexModel.levelIsCenterPinned) {
+            if (position.y - Config.ballRadius < 0) {
+                collisionInfo.verticalHit = true;
+            }
+        }
+
+        return result;
     }
 }

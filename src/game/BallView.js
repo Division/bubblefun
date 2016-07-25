@@ -33,13 +33,19 @@ exports = Class(ImageView, function (supr)
         supr(this, 'init', [options]);
         this.position = new Point();
         this.prevPosition = new Point();
-    };
+    }
 
 
     this.putToPosition = function(position)
     {
         this.position.copyFrom(position);
         this.prevPosition.copyFrom(position);
+        this.updateImageCoordsToPosition();
+    }
+
+
+    this.updateImageCoordsToPosition = function()
+    {
         this.style.x = this.position.x - this.style.width / 2;
         this.style.y = this.position.y - this.style.height / 2;
     }

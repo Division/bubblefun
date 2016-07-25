@@ -4,6 +4,7 @@ import ui.resource.Image as Image;
 import src.game.HexView as HexView;
 import src.utils.Point as Point;
 import src.game.BallInfo as BallInfo;
+import src.Config as Config;
 
 exports = Class(ui.View, function (supr)
 {
@@ -14,6 +15,7 @@ exports = Class(ui.View, function (supr)
     this.STATE_AIM           = 1;
     this.STATE_SHOOT         = 2;
     this.STATE_SHOOT_RECOVER = 3;
+    this.STATE_CHARGE        = 4;
 
     //---------------
     // Const
@@ -25,6 +27,9 @@ exports = Class(ui.View, function (supr)
 
     this.Z_INDEX_BALL = 1;
     this.Z_INDEX_SPRING = 2;
+
+    this.NEXT_BALL_X = 100;
+    this.NEXT_BALL_Y = 100;
 
     this.RECOVER_PERIOD = 200;
 
@@ -38,6 +43,7 @@ exports = Class(ui.View, function (supr)
     this.rightSpringItems = null;
     this.backSpringItem = null;
     this.ballImage = null;
+    this.nextBallImage = null;
 
     this.targetAngle = 0;
     this.currentAngle = 0;
@@ -52,6 +58,9 @@ exports = Class(ui.View, function (supr)
     this.nextShotTime = 0; // Time in ms at wich next shot will be possible
 
     this.currentBallType = 0;
+    this.nextBallType = 0;
+
+    this.lastTargetPoint = null;
 
     //------------------------------------------------------------------------
     // init
@@ -98,8 +107,14 @@ exports = Class(ui.View, function (supr)
             zIndex: this.Z_INDEX_BALL
         });
 
-        this.setCurrentType(BallInfo.BallTypeBlue);
-        // this.randomizeType();
+        this.nextBallImage = new ImageView({
+            superview: this,
+            x: this.NEXT_BALL_X,
+            y: this.NEXT_BALL_Y,
+            width: this.ballRadius * 2,
+            height: this.ballRadius * 2,
+            zIndex: this.Z_INDEX_BALL - 1
+        });
     };
 
 
@@ -112,6 +127,29 @@ exports = Class(ui.View, function (supr)
             image: 'resources/images/star.png',
             zIndex: this.Z_INDEX_SPRING
         });
+    }
+
+    //------------------------------------------------------------------------
+    // Interaction
+    //------------------------------------------------------------------------
+
+    this.startupWithBall = function(nextBall)
+    {
+        this.state = this.STATE_SHOOT_RECOVER;
+        this.setNextType(nextBall);
+        this.ballImage.hide();
+    }
+
+
+    this.chargeBall = function(nextBall)
+    {
+        this.state = this.STATE_CHARGE;
+        this.ballImage.show();
+        this.nextBallImage.hide();
+        this.ballImage.style.x = this.nextBallImage.style.x;
+        this.ballImage.style.y = this.nextBallImage.style.y;
+        this.setCurrentType(this.nextBallType);
+        this.setNextType(nextBall);
     }
 
     //------------------------------------------------------------------------
@@ -139,6 +177,9 @@ exports = Class(ui.View, function (supr)
                 this.state = this.STATE_IDLE;
             }
         }
+        else {
+            this.lastTargetPoint = targetPoint;
+        }
 
         return result;
     }
@@ -146,6 +187,7 @@ exports = Class(ui.View, function (supr)
 
     this.fire = function(targetPoint)
     {
+        this.lastTargetPoint = null;
         if (this.state == this.STATE_AIM && this.setTargetPoint(targetPoint)) {
             this.state = this.STATE_SHOOT;
             this.shotTime = new Date().getTime();
@@ -189,8 +231,10 @@ exports = Class(ui.View, function (supr)
         }
 
         // Positioning the ball
-        this.ballImage.style.x = this.currentPosition.x - this.ballRadius;
-        this.ballImage.style.y = this.currentPosition.y - this.ballRadius;
+        if (this.state != this.STATE_CHARGE) {
+            this.ballImage.style.x = this.currentPosition.x - this.ballRadius;
+            this.ballImage.style.y = this.currentPosition.y - this.ballRadius;
+        }
 
         // Positioning the back single spring
         this.backSpringItem.style.x = this.currentPosition.x + directionToPosition.x * this.ballRadius / 2 - this.backSpringItem.style.width / 2;
@@ -200,7 +244,7 @@ exports = Class(ui.View, function (supr)
 
     this.tick = function(dtMS)
     {
-        var dt = dtMS / 1000,
+        var dt = Math.min(dtMS / 1000, 1/30),
             distanceChange = 30;
 
         switch (this.state) {
@@ -208,6 +252,7 @@ exports = Class(ui.View, function (supr)
                 this.targetDistance = this.STRETCH_DISTANCE;
                 distanceChange = 18;
                 break;
+
             case this.STATE_SHOOT:
                 this.targetDistance = -100;
                 distanceChange = 24;
@@ -232,10 +277,10 @@ exports = Class(ui.View, function (supr)
                 }
 
                 break;
+
             case this.STATE_SHOOT_RECOVER:
                 if (new Date().getTime() > this.nextShotTime) {
-                    this.state = this.STATE_IDLE;
-                    this.ballImage.show();
+
                 }
                 else {
                     distanceChange = 10;
@@ -243,9 +288,32 @@ exports = Class(ui.View, function (supr)
                     this.targetAngle = Math.PI / 2;
                 }
                 break;
+
             case this.STATE_IDLE:
                 this.targetDistance = 1;
                 this.targetAngle = Math.PI / 2;
+                break;
+
+            case this.STATE_CHARGE:
+                var cx = this.ballImage.style.x,
+                    cy = this.ballImage.style.y,
+                    dx = (this.restPosition.x - cx - Config.ballRadius) * 0.17,
+                    dy = (this.restPosition.y - cy - Config.ballRadius) * 0.17;
+                cx += dx;
+                cy += dy;
+
+                if ((cx - this.restPosition.x + Config.ballRadius) * (cx - this.restPosition.x + Config.ballRadius) +
+                    (cy - this.restPosition.y + Config.ballRadius) * (cy - this.restPosition.y + Config.ballRadius) < 20) {
+                    this.state = this.STATE_IDLE;
+                    this.nextBallImage.show();
+                    if (this.lastTargetPoint) {
+                        this.setTargetPoint(this.lastTargetPoint);
+                    }
+                }
+
+                this.ballImage.style.x = cx;
+                this.ballImage.style.y = cy;
+
                 break;
         }
 
@@ -260,6 +328,13 @@ exports = Class(ui.View, function (supr)
     {
         this.currentBallType = type;
         this.ballImage.setImage(BallInfo.getBallImagePath(type));
+    }
+
+
+    this.setNextType = function(type)
+    {
+        this.nextBallType = type;
+        this.nextBallImage.setImage(BallInfo.getBallImagePath(type));
     }
 
 

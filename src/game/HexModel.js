@@ -151,6 +151,12 @@ exports = Class(Emitter, function (supr)
     // Getting data
     //------------------------------------------------------------------------
 
+    this.getBallCount = function()
+    {
+        return 0;
+    }
+
+
     this.getItemAtOffset = function(x, y)
     {
         return this.items[x + y * this.horizontalItemCount];
