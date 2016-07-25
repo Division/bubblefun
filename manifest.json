@@ -1,0 +1,16 @@
+{
+  "appID": "2d7442aba2494b6d90dfc71405c3ea19",
+  "dependencies": {
+    "devkit-core": "https://github.com/gameclosure/devkit-core#"
+  },
+  "shortName": "bubblefun",
+  "studio": {
+    "domain": "studio.example.com",
+    "name": "Your Studio Name",
+    "stagingDomain": "staging.example.com"
+  },
+  "supportedOrientations": [
+    "portrait"
+  ],
+  "title": "bubblefun"
+}
