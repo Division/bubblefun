@@ -131,7 +131,7 @@ exports = Class(ui.View, function (supr)
 
     this.tick = function(dtMS)
     {
-        var dt = dtMS / 1000;
+        var dt = Math.min(dtMS / 1000, 1 / 30);
         this.ballDynamics.update(dt);
     }
 
