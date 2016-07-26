@@ -59,7 +59,6 @@ exports = Class(function ()
         var time = new Date().getTime() / 1000;
         this.nextFixedUpdateTime = time + 1 / this.FIXED_UPDATE_FPS;
         this.moveFalledBalls(dt);
-        this.keepFalledBallsInBounds();
     };
 
     //------------------------------------------------------------------------
@@ -88,11 +87,6 @@ exports = Class(function ()
         }
     }
 
-    this.keepFalledBallsInBounds = function()
-    {
-
-    }
-
 
     this.instantiateFalledBalls = function(items)
     {
@@ -112,8 +106,6 @@ exports = Class(function ()
             ball.updateImageCoordsToPosition();
             ball.show();
             this.falledBalls.push(ball);
-
-            console.log('item', item, 'ball', ball);
         }
     }
 
@@ -155,11 +147,10 @@ exports = Class(function ()
             // Checking collision with other balls
             if (Collision.collideBalls(this.hexModel, convertedPrevPosition, convertedNewPosition, collisionInfo, this.hexView.itemContainer)) {
                 this.handleBallCollision(newPosition, convertedNewPosition, collisionInfo, ball);
-
             }
 
             // Collision with walls
-            else if (Collision.collideWalls(this.hexModel, prevPosition, newPosition, ball, collisionInfo)) {
+            else if (Collision.collideWalls(this.hexModel, prevPosition, newPosition, convertedNewPosition, ball, collisionInfo)) {
                 this.handleWallCollision(newPosition, convertedNewPosition, collisionInfo, ball);
                 if (collisionInfo.verticalHit) {
                     this.handleBallCollision(newPosition, convertedNewPosition, collisionInfo, ball);
@@ -170,8 +161,8 @@ exports = Class(function ()
                                                       convertedNewPosition.y - ball.flyDirection.y);
 
                     this.updateBallOffsetForMovingTheSegment(checkPrevPosition, convertedNewPosition, ball);
-                    if (Collision.collideBalls(this.hexModel, checkPrevPosition, convertedNewPosition, collisionInfo)) {
-                        //this.handleBallCollision(newPosition, convertedNewPosition, collisionInfo, ball);
+                    if (Collision.collideBalls(this.hexModel, checkPrevPosition, convertedNewPosition, collisionInfo, this.hexView.itemContainer)) {
+                        this.handleBallCollision(newPosition, convertedNewPosition, collisionInfo, ball);
                     }
                 }
             }
@@ -179,10 +170,6 @@ exports = Class(function ()
             // Simple movement, no collision occured
             else {
                 ball.putToPosition(newPosition);
-                // var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, Config.hexRadius);
-                // if (this.hexModel.offsetIsAvailableForLanding(offset.x, offset.y)) {
-                //     ball.setOffset(offset);
-                // }
             }
         }
     }
@@ -199,22 +186,11 @@ exports = Class(function ()
         }
 
         ball.putToPosition(newPosition);
-        // var offset = HexMath.pixelToOffset(convertedNewPosition.x, convertedNewPosition.y, Config.hexRadius);
-        // if (this.hexModel.offsetIsAvailableForLanding(offset.x, offset.y)) {
-        //     ball.setOffset(offset);
-        // }
     }
 
 
     this.handleBallCollision = function(newPosition, convertedNewPosition, collisionInfo, ball)
     {
-        ball.putToPosition(newPosition);
-
-        var offsetFound = true;
-        if (!this.hexModel.offsetIsAvailableForLanding(ball.offsetX, ball.offsetY)) {
-            // TODO: implement
-        }
-
         this.hexModel.landBall(ball);
 
         var index = this.firedBalls.indexOf(ball);
@@ -228,12 +204,6 @@ exports = Class(function ()
 
     this.updateBallOffsetForMovingTheSegment = function(startPosition, endPosition, ball)
     {
-        var offset = HexMath.pixelToOffset(endPosition.x, endPosition.y, Config.hexRadius);
-        if (this.hexModel.offsetIsAvailableForLanding(offset.x, offset.y)) {
-            ball.setOffset(offset);
-        }
-
-        /*
         var direction = Point.subtract(endPosition, startPosition).divide(12),
             normal = direction.clone().normalize().normalRightHand(),
             deltaLeft = normal.multiply(Collision.smallCollisionRadius);
@@ -246,7 +216,7 @@ exports = Class(function ()
                 if (self.hexModel.offsetContainsBall(localOffset.x, localOffset.y)) {
                     return true;
                 }
-                else if (self.hexModel.offsetIsAvailableForLanding(localOffset.x, localOffset.y)){
+                else if (self.hexModel.offsetIsAvailableForLanding(localOffset.x, localOffset.y)) {
                     lastValidOffset = localOffset;
                 }
             }
@@ -260,7 +230,7 @@ exports = Class(function ()
                 offsetLeft = HexMath.pixelToOffset(currentPosition.x - deltaLeft.x, currentPosition.y - deltaLeft.y, Config.hexRadius),
                 offsetRight = HexMath.pixelToOffset(currentPosition.x + deltaLeft.x, currentPosition.y + deltaLeft.y, Config.hexRadius);
 
-            if (checkOffset(offset) || checkOffset(offsetLeft) || checkOffset(offsetRight)) {
+            if (checkOffset(offsetLeft) || checkOffset(offsetRight) || checkOffset(offset)) {
                 break;
             }
         }
@@ -269,7 +239,6 @@ exports = Class(function ()
             ball.setOffset(lastValidOffset);
         }
 
-        */
     }
 
 

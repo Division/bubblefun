@@ -28,6 +28,9 @@ exports =
 
     collideBalls: function(hexModel, prevPosition, position, collisionInfo, debugView)
     {
+        collisionInfo.offsetX = 0;
+        collisionInfo.offsetY = 0;
+
         var ballRadius = Config.ballRadius;
             positionOffset = HexMath.pixelToOffset(position.x ,position.y, Config.hexRadius),
             direction = Point.subtract(position, prevPosition).normalize(),
@@ -69,6 +72,8 @@ exports =
 
                     }
 
+                    collisionInfo.offsetX = x;
+                    collisionInfo.offsetY = y;
                     hasCollision = true;
                     return true; // stop iterations
                 }
@@ -84,7 +89,7 @@ exports =
     },
 
 
-    collideWalls: function(hexModel, prevPosition, position, ball, collisionInfo)
+    collideWalls: function(hexModel, prevPosition, position, convertedPosition, ball, collisionInfo)
     {
         var result = false;
 
@@ -93,6 +98,8 @@ exports =
         collisionInfo.verticalTop = null;
         collisionInfo.depthY = null;
         collisionInfo.horizontalHit = false;
+        collisionInfo.verticalHit = false;
+        collisionInfo.verticalTop = false;
 
         if (position.x - Config.ballRadius < 0) {
             collisionInfo.depthX = Config.ballRadius - position.x;
@@ -107,8 +114,10 @@ exports =
             result = true;
         }
         if (!hexModel.levelIsCenterPinned) {
-            if (position.y - Config.ballRadius < 0) {
+            if (convertedPosition.y - Config.ballRadius < 0) {
+                collisionInfo.verticalTop = true;
                 collisionInfo.verticalHit = true;
+                result = true;
             }
         }
 

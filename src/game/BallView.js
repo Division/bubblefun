@@ -66,5 +66,4 @@ exports = Class(ImageView, function (supr)
         this.offsetY = offset.y;
     }
 
-
 });

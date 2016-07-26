@@ -1,5 +1,7 @@
 import src.utils.HexMath as HexMath;
 import ui.View;
+import src.Config as Config;
+import ui.ImageView as ImageView;
 
 exports = Class(ui.View, function (supr)
 {
@@ -13,6 +15,8 @@ exports = Class(ui.View, function (supr)
 
     this.debugLines = null;
     this.debugCircles = null;
+
+    this.targetTopItems = null;
 
     this.debugColors = [
         '',
@@ -30,7 +34,36 @@ exports = Class(ui.View, function (supr)
         this.model = options.model;
         this.debugLines = [];
         this.debugCircles = [];
+        this.targetTopItems = [];
+
+        for (var i = 0; i < Config.defaultHorizontalHexCount; i++) {
+            var position = HexMath.offsetToPixel(i, 0, Config.hexRadius),
+                size = 30;
+
+            this.targetTopItems.push(new ImageView({
+                superview: this,
+                x: position.x - size / 2,
+                y: position.y - size / 2,
+                width: size,
+                height: size,
+                image: 'resources/images/Coin.png'
+            }));
+        }
     };
+
+
+    this.setTopItemsVisible = function(visible)
+    {
+        for (var i = 0; i < this.targetTopItems.length; i++) {
+            if (visible) {
+                this.targetTopItems[i].show();
+            }
+            else {
+                this.targetTopItems[i].hide();
+            }
+        }
+    }
+
 
     this.render = function(ctx)
     {

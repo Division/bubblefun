@@ -23,6 +23,8 @@ exports = Class(Emitter, function (supr)
 
     this.CENTER_PINNED_ITEM_COUNT = 17;
 
+    this.VICTORY_OPEN__ITEM_COUNT = 6;
+
     //---------------
     // Var
 
@@ -196,12 +198,53 @@ exports = Class(Emitter, function (supr)
             return false;
         }
 
+        if (!this.levelIsCenterPinned &&
+            (y != 0 && !self.hexModel.offsetHasNeighbours(x, y))) {
+
+            return false;
+        }
+
         return true;
+    }
+
+
+    this.offsetHasNeighbours = function(x, y)
+    {
+        var result = false,
+            self = this;
+
+        HexMath.iterateNeighbours(x, y, function(x, y) {
+            if (self.offsetIsValidForItems(x, y) && self.offsetContainsBall(x, y)) {
+                result = true;
+                return true;
+            }
+        });
+
+        return result;
     }
 
     //------------------------------------------------------------------------
     // Modification
     //------------------------------------------------------------------------
+
+    this.checkForVictory = function()
+    {
+        if (!this.levelIsCenterPinned) {
+            var emptyCount = 0;
+            for (var i = 0; i > this.horizontalItemCount; i++) {
+                if (this.items[i].type == 0) {
+                    emptyCount++;
+                }
+            }
+
+            if (emptyCount >= this.VICTORY_OPEN__ITEM_COUNT) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
     this.landBall = function(ball)
     {

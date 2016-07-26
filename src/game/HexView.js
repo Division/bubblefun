@@ -19,7 +19,7 @@ exports = Class(ui.View, function (supr)
     this.EVENT_LEVEL_START = 'level_start';
     this.EVENT_INSTANTIATE_BALLS = 'instantiate_balls';
 
-    this.MAXIMUM_LINES_VISIBLE = 8; // 8.5?
+    this.MAXIMUM_LINES_VISIBLE = 9;
 
     this.STATE_IDLE = 0;
     this.STATE_LEVEL_ANIM = 1;
@@ -115,16 +115,23 @@ exports = Class(ui.View, function (supr)
         this.setContainerPosition(Config.hexRadius);
         this.targetContainerY = this.getTargetContainerPosition();
 
-        if (this.linesIsMoreThanVisible()) {
-            this.state = this.STATE_IDLE;
-            this.scrollSpeed = this.LEVEL_ANIM_SCROLL_SPEED;
-            this.idleTime = new Date().getTime() + 1000;
+        if (!this.hexModel.levelIsCenterPinned) {
+            if (this.linesIsMoreThanVisible()) {
+                this.state = this.STATE_IDLE;
+                this.scrollSpeed = this.LEVEL_ANIM_SCROLL_SPEED;
+                this.idleTime = new Date().getTime() + 1000;
+            }
+            else {
+                var self = this;
+                setTimeout(function() {
+                    self.emit(this.EVENT_LEVEL_START);
+                }, 0);
+            }
+
+            this.itemContainer.setTopItemsVisible(true);
         }
         else {
-            var self = this;
-            setTimeout(function() {
-                self.emit(this.EVENT_LEVEL_START);
-            }, 0);
+            this.itemContainer.setTopItemsVisible(false);
         }
     }
 
