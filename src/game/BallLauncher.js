@@ -5,9 +5,14 @@ import src.game.HexView as HexView;
 import src.utils.Point as Point;
 import src.game.BallInfo as BallInfo;
 import src.Config as Config;
+import src.game.BallTrajectory as BallTrajectory;
 
 exports = Class(ui.View, function (supr)
 {
+    //---------------
+    // Event
+    this.EVENT_GET_TRAJECTORY_LENGTH = 'get_trajectory_length';
+
     //---------------
     // State
 
@@ -41,6 +46,8 @@ exports = Class(ui.View, function (supr)
     this.state = this.STATE_IDLE;
     this.ballRadius = 0;
 
+    this.ballTrajectory = null;
+
     this.leftSpringItems = null;
     this.rightSpringItems = null;
     this.backSpringItem = null;
@@ -57,12 +64,13 @@ exports = Class(ui.View, function (supr)
     this.restPosition = null;
 
     this.ballSpeed = 100;
-    this.nextShotTime = 0; // Time in ms at wich next shot will be possible
 
     this.currentBallType = 0;
     this.nextBallType = 0;
 
     this.lastTargetPoint = null;
+
+    this.lastTrajectoryAngle = 0;
 
     //------------------------------------------------------------------------
     // init
@@ -88,6 +96,13 @@ exports = Class(ui.View, function (supr)
     {
         this.leftSpringItems = [];
         this.rightSpringItems = [];
+
+        this.ballTrajectory = new BallTrajectory({
+            superview: this,
+            x: this.restPosition.x,
+            y: this.restPosition.y
+        });
+
         var imageView;
 
         for (var i = 0; i < this.NUMBER_OF_SPRING_ITEMS; i++) {
@@ -135,6 +150,16 @@ exports = Class(ui.View, function (supr)
     // Interaction
     //------------------------------------------------------------------------
 
+    this.toggleBalls = function()
+    {
+        if (this.state == this.STATE_IDLE && this.nextBallType) {
+            var currentType = this.currentBallType;
+            this.setCurrentType(this.nextBallType);
+            this.setNextType(currentType);
+        }
+    }
+
+
     this.startupWithBall = function(nextBall)
     {
         this.state = this.STATE_SHOOT_RECOVER;
@@ -178,10 +203,12 @@ exports = Class(ui.View, function (supr)
             }
             else {
                 this.state = this.STATE_IDLE;
+                this.ballTrajectory.setVisible(false);
             }
         }
         else {
             this.lastTargetPoint = targetPoint;
+            this.ballTrajectory.setVisible(false);
         }
 
         return result;
@@ -195,24 +222,34 @@ exports = Class(ui.View, function (supr)
             this.state = this.STATE_SHOOT;
             this.shotTime = new Date().getTime();
         }
+
+        this.ballTrajectory.setVisible(false);
     }
 
 
     this.updateLayout = function()
     {
+        var aimDirectionX = Math.cos(this.currentAngle),
+            aimDirectionY = Math.sin(this.currentAngle);
+
         // Position of the ball in the launcher
         this.currentPosition.copyFrom(this.restPosition);
-        this.currentPosition.addXY(Math.cos(this.currentAngle) * this.currentDistance,
-                                   Math.sin(this.currentAngle) * this.currentDistance);
-
+        this.currentPosition.addXY(aimDirectionX * this.currentDistance, aimDirectionY * this.currentDistance);
 
         var sideSign = this.currentPosition.y > this.restPosition.y ? 1 : -1,
             directionToPosition = Point.subtract(this.currentPosition, this.restPosition).normalize().multiply(sideSign),
-            normalToDirection = Point.normalRightHand(directionToPosition).multiply(this.ballRadius * 0.5),
+            normalToDirection = Point.normalRightHand(directionToPosition).multiply(this.ballRadius * 0.7),
             leftTargetPoint = Point.add(this.currentPosition, normalToDirection),
             rightTargetPoint = Point.subtract(this.currentPosition, normalToDirection),
             springPosition = new Point(),
-            springDeltaPosition = new Point();
+            springDeltaPosition = new Point(),
+            targetPointOffset = 13;
+
+
+        leftTargetPoint.x += aimDirectionX * targetPointOffset;
+        leftTargetPoint.y += aimDirectionY * targetPointOffset;
+        rightTargetPoint.x += aimDirectionX * targetPointOffset;
+        rightTargetPoint.y += aimDirectionY * targetPointOffset;
 
         // Positioning left and right springs
         for (var i = 0; i < this.NUMBER_OF_SPRING_ITEMS; i++) {
@@ -239,9 +276,25 @@ exports = Class(ui.View, function (supr)
             this.ballImage.style.y = this.currentPosition.y - this.ballRadius;
         }
 
+        if (this.state == this.STATE_AIM && this.currentAngle != this.lastTrajectoryAngle) {
+            this.lastTrajectoryAngle = this.currentAngle;
+            this.ballTrajectory.style.x = this.currentPosition.x;
+            this.ballTrajectory.style.y = this.currentPosition.y;
+            var lengthResult = {},
+                fromPoint = this.ballTrajectory.getPosition(this.getSuperview());
+
+            this.emit(this.EVENT_GET_TRAJECTORY_LENGTH, fromPoint, this.targetAngle,
+                      this.ballTrajectory.TRACK_MAX_DISTANCE, lengthResult);
+
+            this.ballTrajectory.pointTo(this.targetAngle, lengthResult.length, this.currentBallType);
+        }
+        else if (this.state != this.STATE_AIM) {
+            this.ballTrajectory.setVisible(false);
+        }
+
         // Positioning the back single spring
-        this.backSpringItem.style.x = this.currentPosition.x + directionToPosition.x * this.ballRadius / 2 - this.backSpringItem.style.width / 2;
-        this.backSpringItem.style.y = this.currentPosition.y + directionToPosition.y * this.ballRadius / 2 - this.backSpringItem.style.height / 2;
+        this.backSpringItem.style.x = this.currentPosition.x + directionToPosition.x * this.ballRadius * 0.9 - this.backSpringItem.style.width / 2;
+        this.backSpringItem.style.y = this.currentPosition.y + directionToPosition.y * this.ballRadius * 0.9 - this.backSpringItem.style.height / 2;
     }
 
 
@@ -262,7 +315,6 @@ exports = Class(ui.View, function (supr)
                 if (this.currentPosition.y < this.restPosition.y - Math.sin(this.currentAngle) * 50) {
                     this.state = this.STATE_SHOOT_RECOVER;
                     this.ballImage.hide();
-                    this.nextShotTime = new Date().getTime() + this.RECOVER_PERIOD;
 
                     var ballPosition = this.ballImage.getPosition(this.getSuperview());
                     ballPosition.x += this.ballImage.style.width / 2;
@@ -282,14 +334,9 @@ exports = Class(ui.View, function (supr)
                 break;
 
             case this.STATE_SHOOT_RECOVER:
-                if (new Date().getTime() > this.nextShotTime) {
-
-                }
-                else {
-                    distanceChange = 10;
-                    this.targetDistance = 1;
-                    this.targetAngle = Math.PI / 2;
-                }
+                distanceChange = 10;
+                this.targetDistance = 1;
+                this.targetAngle = Math.PI / 2;
                 break;
 
             case this.STATE_IDLE:

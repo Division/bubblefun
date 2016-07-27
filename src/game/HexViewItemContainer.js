@@ -12,11 +12,12 @@ exports = Class(ui.View, function (supr)
     this.radius = 0;
     this.model = null;
 
-
     this.debugLines = null;
     this.debugCircles = null;
 
     this.targetTopItems = null;
+
+    this.topItemsVisible = false,
 
     this.debugColors = [
         '',
@@ -44,9 +45,11 @@ exports = Class(ui.View, function (supr)
                 superview: this,
                 x: position.x - size / 2,
                 y: position.y - size / 2,
+                anchorX: size / 2,
+                anchorY: size / 2,
                 width: size,
                 height: size,
-                image: 'resources/images/Coin.png'
+                image: 'resources/images/Target_item.png'
             }));
         }
     };
@@ -60,6 +63,21 @@ exports = Class(ui.View, function (supr)
             }
             else {
                 this.targetTopItems[i].hide();
+            }
+        }
+
+        this.topItemsVisible = visible;
+    }
+
+
+    this.tick = function(dtMS)
+    {
+        if (this.topItemsVisible) {
+            var time = new Date().getTime() / 1000;
+            for (var i = 0; i < this.targetTopItems.length; i++) {
+                var item = this.targetTopItems[i];
+                item.style.r = Math.PI * time / 3;
+                item.style.scale = 0.6 + Math.sin(time * 3) * 0.08;
             }
         }
     }

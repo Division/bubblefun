@@ -17,10 +17,10 @@ exports = {
 
     cubeToOffset: function(cubeX, cubeY, cubeZ)
     {
-        return {
-            x: cubeX + (cubeZ - (cubeZ & 1)) / 2,
-            y: cubeZ
-        }
+        return new Point(
+            cubeX + (cubeZ - (cubeZ & 1)) / 2,
+            cubeZ
+        );
     },
 
     axialToCube: function(q, r)

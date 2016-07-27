@@ -4,6 +4,7 @@ import ui.resource.Image as Image;
 import src.Config as Config;
 import src.game.GameView as GameView;
 import math.geom.Point as GCPoint;
+import ui.widget.ButtonView as ButtonView;
 
 /**
     GameScreen contains gameView, background, GUI and listens for the input
@@ -22,6 +23,12 @@ exports = Class(ui.View, function (supr)
 
     // Contains all the gameplay items (balls, cannon etc)
     this.gameView = null;
+    this.uiContainer = null;
+
+    //---------------
+    // UI
+
+    this.buttonSwapBalls = null;
 
     this.init = function(options)
     {
@@ -56,6 +63,15 @@ exports = Class(ui.View, function (supr)
             height: Config.screenHeight
         });
 
+        this.uiContainer = new ui.View({
+            superview: this,
+            scale: gameScale,
+            x: this.style.width / 2 - (Config.screenWidth / 2) * gameScale,
+            y: 0,
+            width: Config.screenWidth,
+            height: Config.screenHeight
+        });
+
         // Events
         var self = this;
         this.on('InputStart', function(e, point) {
@@ -80,8 +96,25 @@ exports = Class(ui.View, function (supr)
             self.gameView.handleTapEnd(gameViewPoint);
         });
 
-
+        this.setupUI();
     };
 
+
+    this.setupUI = function()
+    {
+        var self = this;
+        this.buttonSwapBalls = new ButtonView({
+            superview: this.uiContainer,
+            width: 80,
+            height: 80,
+            x: this.gameView.style.x + Config.screenWidth / 2 - 40,
+            y: Config.screenHeight - 145,
+            on: {
+                up: function () {
+                    self.gameView.toggleBalls();
+                }
+            }
+        });
+    }
 
 });

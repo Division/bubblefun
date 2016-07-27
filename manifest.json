@@ -12,5 +12,19 @@
   "supportedOrientations": [
     "portrait"
   ],
-  "title": "bubblefun"
+  "title": "bubblefun",
+
+  "browser": {
+    "canvas": {
+      "height": 1024,
+      "useWebGL": true,
+      "width": 768
+    },
+    "openGraph": {
+      "description": "Fun bubble game",
+      "title": "Bubblefun",
+      "type": "game",
+      "url": "http://bubblefun.xogames.org"
+    }
+  }
 }

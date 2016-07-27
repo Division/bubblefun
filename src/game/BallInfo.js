@@ -5,6 +5,7 @@ exports =
     BallTypeGreen: 3,
     BallTypePurple: 4,
     BallTypeYellow: 5,
+    BallTypeBlack: 6,
 
     getBallImagePath: function(ballType)
     {
@@ -19,6 +20,9 @@ exports =
                 return "resources/images/Purple_Ball.png";
             case this.BallTypeYellow:
                 return "resources/images/Yellow_Ball.png";
+            case this.BallTypeBlack:
+                return "resources/images/Black_Ball.png";
+
         }
 
         return undefined;

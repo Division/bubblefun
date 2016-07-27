@@ -4,7 +4,8 @@ var r = BallInfo.BallTypeRed,
     g = BallInfo.BallTypeGreen,
     b = BallInfo.BallTypeBlue,
     p = BallInfo.BallTypePurple,
-    y = BallInfo.BallTypeYellow
+    y = BallInfo.BallTypeYellow,
+    z = BallInfo.BallTypeBlack;
 
 exports =
 {
@@ -42,5 +43,18 @@ exports =
              [ r , r , y , y , b , b , r , r , g , g ]
         ]
     },
+
+    'vertial_stripes': {
+        lines: [
+            [0 , g , g , 0 , 0 , r , 0 , 0 , g , g , 0],
+              [g , z , r , 0 , y , y , 0 , b , z , y],
+            [0 , r , r , 0 , y , z , g , 0 , y , y , 0],
+              [0 , y , 0 , 0 , g , g , 0 , 0 , g , 0],
+            [0 , g , g , 0 , 0 , b , 0 , 0 , r , r , 0],
+              [b , z , g , 0 , r , y , 0 , r , z , g],
+            [0 , b , b , 0 , 0 , r , 0 , 0 , g , g , 0],
+              [0 , y , 0 , 0 , g , g , 0 , 0 , g , 0],
+        ]
+    }
 
 }

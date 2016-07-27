@@ -9,6 +9,7 @@ import src.game.BallDynamics as BallDynamics;
 import src.game.BallInfo as BallInfo;
 import ui.ViewPool as ViewPool;
 import src.game.HexModel as HexModel;
+import src.utils.Collision as Collision;
 
 exports = Class(ui.View, function (supr)
 {
@@ -85,7 +86,13 @@ exports = Class(ui.View, function (supr)
             self.ballDynamics.fireBall(data.position, data.direction, data.type);
         });
 
-        this.loadLevel(1);
+        this.ballLauncher.on(this.ballLauncher.EVENT_GET_TRAJECTORY_LENGTH, function(point, angle, maxDistance, resultObject) {
+            var localPoint = self.hexView.convertPointFromGameViewToItemContainerView(point.x, point.y);
+            resultObject.length = Collision.getTrajectoryDistance(self.hexModel, point, localPoint,
+                                                                  angle, maxDistance, self.hexView.itemContainer);
+        });
+
+        this.loadLevel(2);
     };
 
 
@@ -114,6 +121,12 @@ exports = Class(ui.View, function (supr)
         var ballLauncherPoint = point;
         this.ballLauncher.style.localizePoint(ballLauncherPoint);
         this.ballLauncher.fire(ballLauncherPoint);
+    };
+
+
+    this.toggleBalls = function()
+    {
+        this.ballLauncher.toggleBalls();
     };
 
     //------------------------------------------------------------------------

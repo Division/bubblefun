@@ -199,7 +199,7 @@ exports = Class(Emitter, function (supr)
         }
 
         if (!this.levelIsCenterPinned &&
-            (y != 0 && !self.hexModel.offsetHasNeighbours(x, y))) {
+           (y != 0 && !self.hexModel.offsetHasNeighbours(x, y))) {
 
             return false;
         }
