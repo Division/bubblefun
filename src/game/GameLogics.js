@@ -39,14 +39,12 @@ exports = Class(Emitter, function (supr)
             this.ballCount = this.DEFAULT_BALL_COUNT;
         }
 
-        // this.ballLauncher.startupWithBall(this.getNextBall());
-        this.ballLauncher.startupWithBall(2);
+        this.ballLauncher.startupWithBall(this.getNextBall());
     }
 
 
     this.handleLevelStart = function()
     {
-        console.log('start');
         this.ballLauncher.chargeBall(this.getNextBall());
     }
 
@@ -59,7 +57,8 @@ exports = Class(Emitter, function (supr)
 
     this.getNextBall = function()
     {
-        return Math.floor(Math.random() * 5 + 1);
+        var ballsAvailable = this.hexModel.availableBallTypes;
+        return ballsAvailable[Math.floor(Math.random() * ballsAvailable.length)];
     }
 
 

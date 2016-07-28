@@ -23,10 +23,10 @@ exports =
         ]
     },
 
-    'three_color_group1': {
+    'three_color_group_rpy': {
         lines: [
-            [r , r , g , y , y , p , b , b , r , g , g],
-             [ r , g , g , y , p , p , b , r , r , g ]
+            [r , r , p , y , y , p , r , r , r , y , y],
+             [ r , p , p , y , p , p , r , r , r , y ]
         ]
     },
 
@@ -37,10 +37,10 @@ exports =
         ]
     },
 
-    'halfring_rg': {
+    'halfring_rgb': {
         lines: [
-            [r , r , r , y , y , p , r , r , g , g , g],
-             [ r , r , y , y , b , b , r , r , g , g ]
+            [r , r , r , g , g , b , r , r , g , g , g],
+             [ r , r , g , g , b , b , r , r , g , g ]
         ]
     },
 
@@ -54,6 +54,19 @@ exports =
               [b , z , g , 0 , r , y , 0 , r , z , g],
             [0 , b , b , 0 , 0 , r , 0 , 0 , g , g , 0],
               [0 , y , 0 , 0 , g , g , 0 , 0 , g , 0],
+        ]
+    },
+
+    'hex_cells': {
+        lines: [
+            [0 , z , p , p , b , z , b , g , g , z , 0],
+              [r , r , 0 , 0 , g , g , 0 , 0 , p , p],
+            [r , z , b , 0 , g , z , p , 0 , b , z , p],
+              [b , b , r , r , p , p , g , g , b , b],
+            [0 , 0 , r , z , r , 0 , g , z , g , 0 , 0],
+              [g , g , r , r , b , b , g , g , p , p],
+            [g , z , g , 0 , b , z , b , 0 , p , z , p],
+              [g , g , 0 , 0 , b , b , 0 , 0 , p , p],
         ]
     }
 

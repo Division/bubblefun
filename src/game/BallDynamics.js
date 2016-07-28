@@ -15,7 +15,7 @@ exports = Class(function ()
     //---------------
     // Var
 
-    this.BALL_FLY_SPEED = 1000;
+    this.BALL_FLY_SPEED = 1400;
 
     /**
         Array of BallView
@@ -81,8 +81,6 @@ exports = Class(function ()
                 this.falledBalls[i] = this.falledBalls[this.falledBalls.length - 1];
                 this.falledBalls.pop();
                 this.ballPool.releaseView(ball);
-
-                console.log('releasing ball');
             }
         }
     }

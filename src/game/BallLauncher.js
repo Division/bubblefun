@@ -23,6 +23,13 @@ exports = Class(ui.View, function (supr)
     this.STATE_CHARGE        = 4;
 
     //---------------
+    // Aim type
+
+    this.AIM_TYPE_NONE = 0;
+    this.AIM_TYPE_TOP = 1;
+    this.AIM_TYPE_BOTTOM = 2;
+
+    //---------------
     // Const
 
     this.NUMBER_OF_SPRING_ITEMS = 5;
@@ -33,8 +40,8 @@ exports = Class(ui.View, function (supr)
     this.Z_INDEX_BALL = 1;
     this.Z_INDEX_SPRING = 2;
 
-    this.NEXT_BALL_X = 100;
-    this.NEXT_BALL_Y = 100;
+    this.NEXT_BALL_X = 200;
+    this.NEXT_BALL_Y = 145;
 
     this.RECOVER_PERIOD = 200;
 
@@ -71,6 +78,8 @@ exports = Class(ui.View, function (supr)
     this.lastTargetPoint = null;
 
     this.lastTrajectoryAngle = 0;
+
+    this.aimType = this.AIM_TYPE_NONE;
 
     //------------------------------------------------------------------------
     // init
@@ -193,12 +202,23 @@ exports = Class(ui.View, function (supr)
 
         // Proceed only for IDLE and AIM state
         if (this.state == this.STATE_IDLE || this.state == this.STATE_AIM) {
-            if (targetPoint.y < this.restPosition.y - 20) {
+            if (targetPoint.y < this.restPosition.y - 30 && this.aimType != this.AIM_TYPE_BOTTOM) {
                 var direction = Point.subtract(targetPoint, this.restPosition),
                     horizontal = new Point(1, 0);
                 this.targetAngle = Point.angle(horizontal, direction);
                 this.targetAngle = Math.min(Math.max(this.ANGLE_LIMIT, this.targetAngle), Math.PI - this.ANGLE_LIMIT);
                 this.state = this.STATE_AIM;
+                this.aimType = this.AIM_TYPE_TOP;
+                result = true;
+            }
+            else if (targetPoint.y > this.restPosition.y - Config.ballRadius  && this.aimType != this.AIM_TYPE_TOP) {
+                var direction = Point.subtract(this.restPosition, targetPoint),
+                    horizontal = new Point(1, 0);
+
+                this.targetAngle = Point.angle(horizontal, direction);
+                this.targetAngle = Math.min(Math.max(this.ANGLE_LIMIT, this.targetAngle), Math.PI - this.ANGLE_LIMIT);
+                this.state = this.STATE_AIM;
+                this.aimType = this.AIM_TYPE_BOTTOM;
                 result = true;
             }
             else {
@@ -209,6 +229,7 @@ exports = Class(ui.View, function (supr)
         else {
             this.lastTargetPoint = targetPoint;
             this.ballTrajectory.setVisible(false);
+            this.aimType = this.AIM_TYPE_NONE;
         }
 
         return result;
@@ -218,11 +239,13 @@ exports = Class(ui.View, function (supr)
     this.fire = function(targetPoint)
     {
         this.lastTargetPoint = null;
+
         if (this.state == this.STATE_AIM && this.setTargetPoint(targetPoint)) {
             this.state = this.STATE_SHOOT;
             this.shotTime = new Date().getTime();
         }
 
+        this.aimType = this.AIM_TYPE_NONE;
         this.ballTrajectory.setVisible(false);
     }
 
@@ -306,7 +329,7 @@ exports = Class(ui.View, function (supr)
         switch (this.state) {
             case this.STATE_AIM:
                 this.targetDistance = this.STRETCH_DISTANCE;
-                distanceChange = 18;
+                distanceChange = 38;
                 break;
 
             case this.STATE_SHOOT:

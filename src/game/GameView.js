@@ -92,7 +92,6 @@ exports = Class(ui.View, function (supr)
                                                                   angle, maxDistance, self.hexView.itemContainer);
         });
 
-        this.loadLevel(2);
     };
 
 
@@ -102,6 +101,10 @@ exports = Class(ui.View, function (supr)
 
     this.handleTapStart = function(point)
     {
+        if (this.hexModel.levelIsCompleted) {
+            return;
+        }
+
         var ballLauncherPoint = point;
         this.ballLauncher.style.localizePoint(ballLauncherPoint);
         this.ballLauncher.setTargetPoint(ballLauncherPoint);
@@ -110,6 +113,10 @@ exports = Class(ui.View, function (supr)
 
     this.handleTapMove = function(point)
     {
+        if (this.hexModel.levelIsCompleted) {
+            return;
+        }
+
         var ballLauncherPoint = point;
         this.ballLauncher.style.localizePoint(ballLauncherPoint);
         this.ballLauncher.setTargetPoint(ballLauncherPoint);
@@ -118,6 +125,10 @@ exports = Class(ui.View, function (supr)
 
     this.handleTapEnd = function(point)
     {
+        if (this.hexModel.levelIsCompleted) {
+            return;
+        }
+
         var ballLauncherPoint = point;
         this.ballLauncher.style.localizePoint(ballLauncherPoint);
         this.ballLauncher.fire(ballLauncherPoint);
@@ -126,6 +137,10 @@ exports = Class(ui.View, function (supr)
 
     this.toggleBalls = function()
     {
+        if (this.hexModel.levelIsCompleted) {
+            return;
+        }
+        
         this.ballLauncher.toggleBalls();
     };
 

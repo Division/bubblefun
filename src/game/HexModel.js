@@ -1,4 +1,5 @@
 import event.Emitter as Emitter;
+import src.game.BallInfo as BallInfo;
 import src.utils.HexMath as HexMath;
 import src.game.level.LevelBlocks as LevelBlocks;
 import src.game.level.Levels as Levels;
@@ -14,7 +15,7 @@ exports = Class(Emitter, function (supr)
     this.EVENT_BALL_LANDED          = "ball_landed";
     this.EVENT_ITEMS_DESTROYED      = "items_destroyed";
     this.EVENT_ITEMS_FALL           = "items_fall";
-    this.EVENT_LEVEL_DONE           = "level_done";
+    this.EVENT_LEVEL_COMPLETED      = "level_completed";
     this.EVENT_LINES_COUNT_CHANGED  = "line_number_changed";
 
 
@@ -23,7 +24,7 @@ exports = Class(Emitter, function (supr)
 
     this.CENTER_PINNED_ITEM_COUNT = 17;
 
-    this.VICTORY_OPEN__ITEM_COUNT = 6;
+    this.VICTORY_OPEN_ITEM_COUNT = 6;
 
     //---------------
     // Var
@@ -54,6 +55,14 @@ exports = Class(Emitter, function (supr)
     */
     this.levelIsCenterPinned = false;
 
+
+    /**
+        Array of ball types that can be spawned on the current level
+    */
+    this.availableBallTypes = [];
+
+    this.levelIsCompleted = false;
+
     //------------------------------------------------------------------------
     // Init
     //------------------------------------------------------------------------
@@ -70,6 +79,8 @@ exports = Class(Emitter, function (supr)
 
     this.loadLevelByNumber = function(levelNumber)
     {
+        this.levelIsCompleted = false;
+
         var levelIndex = levelNumber - 1;
         if (levelIndex < 0 || levelNumber > Levels.length) {
             this.throwError('Invalid level number: ' + levelNumber);
@@ -79,6 +90,7 @@ exports = Class(Emitter, function (supr)
 
         this.items = [];
         this.numberOfLines = this.fillLinesRecursively(levelData, 0);
+        this.updateBallTypes();
 
         this.emit(this.EVENT_LEVEL_LOADED);
     }
@@ -147,6 +159,23 @@ exports = Class(Emitter, function (supr)
     {
         var item = this.getItemAtOffset(x, y);
         item.ball = ballView;
+    }
+
+
+    this.updateBallTypes = function()
+    {
+        this.availableBallTypes = [];
+        var hash = {};
+        for (var i = 0; i < this.items.length; i++) {
+            var item = this.items[i];
+
+            if (item.type != 0 && item.type != BallInfo.BallTypeBlack) {
+                if (!hash[item.type]) {
+                    hash[item.type] = true;
+                    this.availableBallTypes.push(item.type);
+                }
+            }
+        }
     }
 
     //------------------------------------------------------------------------
@@ -231,13 +260,13 @@ exports = Class(Emitter, function (supr)
     {
         if (!this.levelIsCenterPinned) {
             var emptyCount = 0;
-            for (var i = 0; i > this.horizontalItemCount; i++) {
+            for (var i = 0; i < this.horizontalItemCount; i++) {
                 if (this.items[i].type == 0) {
                     emptyCount++;
                 }
             }
 
-            if (emptyCount >= this.VICTORY_OPEN__ITEM_COUNT) {
+            if (emptyCount >= this.VICTORY_OPEN_ITEM_COUNT) {
                 return true;
             }
         }
@@ -269,10 +298,15 @@ exports = Class(Emitter, function (supr)
             offsetY: ball.offsetY
         });
 
-        this.searchAndDestroySimilarBalls(ball.offsetX, ball.offsetY);
+        var hasSimilarBalls = this.searchAndDestroySimilarBalls(ball.offsetX, ball.offsetY);
 
         if (startLineNumber != this.numberOfLines) {
             this.emit(this.EVENT_LINES_COUNT_CHANGED);
+        }
+
+        if (hasSimilarBalls && this.checkForVictory()) {
+            this.levelIsCompleted = true;
+            this.emit(this.EVENT_LEVEL_COMPLETED);
         }
     }
 
@@ -333,7 +367,11 @@ exports = Class(Emitter, function (supr)
             this.searchAndFallSeparatedBalls();
 
             this.updateLineNumber(minRow);
+
+            return true;
         }
+
+        return false;
     }
 
 
