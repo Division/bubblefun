@@ -16,9 +16,9 @@
 
   "browser": {
     "canvas": {
-      "height": 1024,
+      "height": 640,
       "useWebGL": true,
-      "width": 768
+      "width": 480
     },
     "openGraph": {
       "description": "Fun bubble game",
