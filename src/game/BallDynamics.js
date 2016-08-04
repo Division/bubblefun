@@ -202,7 +202,7 @@ exports = Class(function ()
 
     this.updateBallOffsetForMovingTheSegment = function(startPosition, endPosition, ball)
     {
-        var direction = Point.subtract(endPosition, startPosition).divide(12),
+        var direction = Point.subtract(endPosition, startPosition).divide(20),
             normal = direction.clone().normalize().normalRightHand(),
             deltaLeft = normal.multiply(Collision.smallCollisionRadius);
             currentPosition = startPosition.clone(),

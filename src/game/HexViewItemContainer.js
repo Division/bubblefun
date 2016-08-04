@@ -25,7 +25,8 @@ exports = Class(ui.View, function (supr)
         '#2e83ee',
         '#45ce17',
         '#cc2ce8',
-        '#fded2f'
+        '#fded2f',
+        '#000000'
     ];
 
     this.init = function(options)
@@ -188,7 +189,6 @@ exports = Class(ui.View, function (supr)
                 }
 
                 var position = HexMath.offsetToPixel(i, j, this.radius);
-
 
                 ctx.beginPath();
                 for (var k = 0; k < 7; k++) {

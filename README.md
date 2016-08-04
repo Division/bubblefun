@@ -14,3 +14,5 @@ a path to a git repository.
 ~~~
 devkit init newproject --git-template https://github.com/gameclosure/devkit-application-template
 ~~~
+
+test
