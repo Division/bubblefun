@@ -47,16 +47,20 @@ exports =
         collisionInfo.offsetX = 0;
         collisionInfo.offsetY = 0;
 
-        var ballRadius = Config.ballRadius;
-            positionOffset = HexMath.pixelToOffset(position.x ,position.y, Config.hexRadius),
-            direction = Point.subtract(position, prevPosition).normalize(),
+        var ballRadius = Config.ballRadius,
             leftPoint1 = prevPosition.clone(),
-            leftPoint2 = position.clone();
-            leftPoint2.addXY(direction.x * ballRadius, direction.y * ballRadius);
-        var rightPoint1 = leftPoint1.clone(),
-            rightPoint2 = leftPoint2.clone();
+            leftPoint2 = position.clone(),
+            rightPoint1 = leftPoint1.clone(),
+            rightPoint2 = leftPoint2.clone(),
+            direction = Point.subtract(position, prevPosition),
+            distance = direction.getMagnitude();
 
-        normal = direction.normalRightHand().multiply(this.smallCollisionRadius);
+            direction.divide(distance);
+            leftPoint2.addXY(direction.x * ballRadius, direction.y * ballRadius),
+            rightPoint2.addXY(direction.x * ballRadius, direction.y * ballRadius);
+
+
+        var normal = direction.clone().normalRightHand().multiply(this.smallCollisionRadius);
 
             leftPoint1.subtract(normal);
             leftPoint2.subtract(normal);
@@ -65,39 +69,70 @@ exports =
 
         var self = this,
             hasCollision = false,
-            lineCircleCollisionInfo = {};
+            lineCircleCollisionInfo = {},
+            indexesToCheck = {},
+            checkLength = Config.ballRadius,
+            positionOffset = HexMath.pixelToOffset(position.x, position.y, Config.hexRadius),
+            minDistance = distance * 2;
 
-        HexMath.iterateNeighbours(positionOffset.x, positionOffset.y, function(x, y) {
-            if (hexModel.offsetIsValidForItems(x, y) && hexModel.offsetContainsBall(x, y)) {
+        // Getting the cells to check for collision
+        var numIterations = Math.ceil(distance/checkLength);
+        for (var i = 0; i <= numIterations; i++) {
+            var currentOffset = HexMath.pixelToOffset(prevPosition.x + direction.x * checkLength * i,
+                                                      prevPosition.y + direction.y * checkLength * i,
+                                                      Config.hexRadius);
 
-                // Checking first line
-                if (self.lineVsCircle(leftPoint1, leftPoint2,
-                                      HexMath.offsetToPixel(x, y, Config.hexRadius),
-                                      ballRadius, lineCircleCollisionInfo) ||
-                // Checking second line
-                    self.lineVsCircle(rightPoint1, rightPoint2,
-                                           HexMath.offsetToPixel(x, y, Config.hexRadius),
-                                           ballRadius, lineCircleCollisionInfo)) {
-
-                    if (debugView) {
-                        debugView.addDebugLine(leftPoint1, leftPoint2);
-                        debugView.addDebugLine(rightPoint1, rightPoint2);
-                        debugView.addDebugCircle(lineCircleCollisionInfo.circleCenter,
-                                                 lineCircleCollisionInfo.circleRadius,
-                                                 'black', 2);
-                        debugView.addDebugCircle(lineCircleCollisionInfo.collisionPoint, 3, 'red', 1);
-                    }
-
-                    collisionInfo.offsetX = x;
-                    collisionInfo.offsetY = y;
-                    hasCollision = true;
-                    return true; // stop iterations
-                }
+            if (hexModel.offsetIsValidForItems(currentOffset.x, currentOffset.y) &&
+                hexModel.offsetContainsBall(currentOffset.x, currentOffset.y)) {
+                indexesToCheck[currentOffset.x + currentOffset.y * hexModel.horizontalItemCount] = true;
             }
 
-        });
+            HexMath.iterateNeighbours(currentOffset.x, currentOffset.y, function(x, y) {
+                if (hexModel.offsetIsValidForItems(x, y) &&
+                    hexModel.offsetContainsBall(x, y)) {
+                    indexesToCheck[x + y * hexModel.horizontalItemCount] = true;
+                }
+            });
+        }
+
+
+        for (var index in indexesToCheck) {
+            var x = parseInt(index) % hexModel.horizontalItemCount,
+                y = Math.floor(parseInt(index) / hexModel.horizontalItemCount),
+                currentCenter = HexMath.offsetToPixel(x, y, Config.hexRadius),
+                currentDistance = Point.distance(prevPosition, currentCenter);
+
+                // console.log('Checking ' + x + ', ' + y);
+
+            // Checking first line
+            if (currentDistance < minDistance &&
+                (self.lineVsCircle(leftPoint1, leftPoint2,
+                                  currentCenter,
+                                  ballRadius, lineCircleCollisionInfo) ||
+            // Checking second line
+                self.lineVsCircle(rightPoint1, rightPoint2,
+                                       currentCenter,
+                                       ballRadius, lineCircleCollisionInfo))) {
+
+                minDistance = currentDistance;
+
+                if (debugView) {
+                    debugView.addDebugLine(leftPoint1, leftPoint2);
+                    debugView.addDebugLine(rightPoint1, rightPoint2);
+                    debugView.addDebugCircle(lineCircleCollisionInfo.circleCenter,
+                                             lineCircleCollisionInfo.circleRadius,
+                                             'black', 2);
+                    debugView.addDebugCircle(lineCircleCollisionInfo.collisionPoint, 3, 'red', 1);
+                }
+
+                collisionInfo.offsetX = x;
+                collisionInfo.offsetY = y;
+                hasCollision = true;
+            }
+        }
 
         if (hasCollision) {
+            // console.log('collision at ' + collisionInfo.offsetX + ', ' + collisionInfo.offsetY);
             return true;
         }
 
@@ -181,7 +216,7 @@ exports =
             checkCollision(-normal.x, -normal.y);
             checkCollision(normal.x, normal.y);
         }
-        
+
         // Calculate distance to the wall;
         if (!collidesBall) {
             tga = b / a;
